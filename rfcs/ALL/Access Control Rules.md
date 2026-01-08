@@ -79,14 +79,18 @@ The *rules* section itself has sub-fields: *id*, *messages*, *flows*, *permissio
 * **permission**: supports value `allow` or `deny`.
 * **key_exprs**: supports values of any key type or key-expression (set of keys) type, eg: `temp/room_1`, `temp/**` etc. (see [Key_Expressions](https://github.com/eclipse-zenoh/roadmap/blob/main/rfcs/ALL/Key%20Expressions.md))
 
-The *subjects* section has the following sub-fields: *id*, *interfaces*, *cert_common_names*, *usernames*. The values provided are matched with the characteristics of connected Zenoh instances, in order to identify which rules to apply on which instance's messages.
+The *subjects* section's fields are matched with the characteristics of connected Zenoh instances, in order to identify which rules to apply on which instance's messages. The following is a list of supported fields:
 
 * **id**: unique string identifier within the subjects list.
 * **interfaces**: list of local network interfaces through which the configured instance communicates with the remote instance to be matched. Supports all possible values for network interfaces, eg: `lo`, `lo0` etc. If this field is not provided, it will match instances connected on any network interfaces, or none (currently possible on certain link protocols, ex: *websocket*).
 * **cert_common_names**: list of certificate common names which are matched with the respective certificate content of the remote instances connected using TLS or QUIC transport. This requires that the local instance has a valid TLS authentication configuration. If this field is not provided, it will match with instances that have any certificate common name or none.
 * **usernames**: list of usernames to be matched with the authentication config of remote instances. This requires that the local instance has a valid user-password authentication configuration. If this field is not provided, it will match with instances that have any username or none.
+* **link_protocols**: list of link protocols connecting with the remote instance. Note that the evaluation of this filter is performed depending on existing connections, and not depending on which link the message is scheduled on (in case of multilink).
+If not provided, this subject will match remote connections of all supported link protocols.
+* **zids**: list of Zenoh IDs. Because the Zenoh ID is not backed by an authentication mechanism, it can only be trusted for ACL if it is dynamically added/removed by internal and dedicated Zenoh mechanisms when transports are opened/closed.
+If managed manually in ACL config, it can be useful for prototyping, but its use in production is highly discouraged since it is easily spoofed by manually setting it in an instance's config.
 
-Note that a subject with no *interfaces*, *cert_common_names* and *usernames* is valid, and matches all Zenoh instances (wildcard).
+Note that a subject with no sub-fields (except the **id** which is mandatory) is valid, and matches all Zenoh instances (wildcard).
 
 Finally, the *policies* section allows to associate (i.e apply) rules to subjects. It is a list of JSON objects containing each a *rules* and *subjects* list, which respectively contain identifiers of declared rules and declared subjects to be associated.
 
