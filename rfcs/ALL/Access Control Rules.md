@@ -161,6 +161,11 @@ fn is_allowed(key_expr) -> decision {
 }
 ```
 
+The logic described above runs for each subject combination matching the transport on which the message is being evaluated, allowing the message to pass as soon as one combination returns an `allow` decision
+(and therefore dropping the message if and only if all matching subject combinations evaluate to `deny`). This logic is motivated by the reasoning that if at least one matching subject gives the transport the necessary permission,
+then it should be allowed to perform said operation. Note that no distinction is made, at this level, between default permissions and explicit permissions: a default permission `allow` can take priority over an explicit `deny`
+when the decisions apply on different subject combinations that match the transport in question.
+
 ## Key-Expression Matching
 
 All requests are macthed on keys and key expressions (for more information on key expressions, check out [Key_Expressions](https://github.com/eclipse-zenoh/roadmap/blob/main/rfcs/ALL/Key%20Expressions.md)). Therefore, it is important to understand how the key-expression matching works, since it ultimately decides the behavior of the access control logic. In matching a key-expression against a KeTree, it will match as a positive only if it is *included in* (*equal to* or *subset of*) the key-expressions specified in the KeTree. A partial match or being a superset will not result in a match.
