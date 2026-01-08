@@ -74,7 +74,7 @@ The *default_permission* field provides the implicit permission for the filterin
 The *rules* section itself has sub-fields: *id*, *messages*, *flows*, *permission*, *key_exprs*. The values provided in these fields set the explicit rules for the access control over individual messages:
 
 * **id**: unique string identifier within the rules list.
-* **messages**: supports the following types of messsges - `put`, `delete`, `declare_subscriber`, `query`, `reply`, `declare_queryable`, `liveliness_token`, `declare_liveliness_subscriber`, `liveliness_query`.
+* **messages**: supports the following types of messages - `put`, `delete`, `declare_subscriber`, `query`, `reply`, `declare_queryable`, `liveliness_token`, `declare_liveliness_subscriber`, `liveliness_query`.
 * **flows**: supports two values - `egress` and `ingress`. If this field is not provided, the rule will apply to both flows.
 * **permission**: supports value `allow` or `deny`.
 * **key_exprs**: supports values of any key type or key-expression (set of keys) type, eg: `temp/room_1`, `temp/**` etc. (see [Key_Expressions](https://github.com/eclipse-zenoh/roadmap/blob/main/rfcs/ALL/Key%20Expressions.md))
@@ -90,9 +90,9 @@ Note that a subject with no *interfaces*, *cert_common_names* and *usernames* is
 
 Finally, the *policies* section allows to associate (i.e apply) rules to subjects. It is a list of JSON objects containing each a *rules* and *subjects* list, which respectively contain identifiers of declared rules and declared subjects to be associated.
 
-For example, in our sample config, the *default_permission* is set to deny and then the `"allow pub/sub on test/demo"` rule is added to explicitly allow certain behavior. Here, a node connecting via the `lo0` interface will be allowed to `put`, `delete` and `declare_subscriber` on the `test/demo` key expression for both incoming and outgoing messages. However, if there is a node trying to send another message type (eg: `query`), it will be denied. Additionally, nodes connected via any interface and authentified with one of the listed usernames in the `"usernames on any interface"` subject are also allowed to `put`, `delete` and `declare_subscriber` on the `test/demo` key expression. This provides a granular access control over permissions, ensuring that only authorized devices or networks can perform allowed behavior. 
+For example, in our sample config, the *default_permission* is set to deny and then the `"allow pub/sub on test/demo"` rule is added to explicitly allow certain behavior. Here, a node connecting via the `lo0` interface will be allowed to `put`, `delete` and `declare_subscriber` on the `test/demo` key expression for both incoming and outgoing messages. However, if there is a node trying to send another message type (eg: `query`), it will be denied. Additionally, nodes connected via any interface and authenticated with one of the listed usernames in the `"usernames on any interface"` subject are also allowed to `put`, `delete` and `declare_subscriber` on the `test/demo` key expression. This provides a granular access control over permissions, ensuring that only authorized devices or networks can perform allowed behavior. 
 
-Internally, for each combination of *subject_combination* + *flow* + *message*  (example:`Interface("l0")`+`"egress"`+`"put"`) parsed from the config, we construct *allow* and *deny* KeTrees (key-expression tries). The *allow* KeTree is built using all the key-expressions provided in the config on which that *subject* is allowed to perform that *action* on a particular *flow*. On receiving an authorization request, the key-expression in the request is matched against the appropriate KeTrees to confirm authorization.
+Internally, for each combination of *subject_combination* + *flow* + *message* (example:`Interface("l0")`+`"egress"`+`"put"`) parsed from the config, we construct *allow* and *deny* KeTrees (key-expression tries). The *allow* KeTree is built using all the key-expressions provided in the config on which that *subject* is allowed to perform that *action* on a particular *flow*. On receiving an authorization request, the key-expression in the request is matched against the appropriate KeTrees to confirm authorization.
 
 ## Subject combinations
 
@@ -101,7 +101,7 @@ Subjects are mainly comprised of three lists of characteristics to be matched: *
 - Two items within the same list are considered a logical OR
 - Two items across different lists are considered a logical AND
 
-These rules are built based on the assumption that an individual message on which ACL rules are to be applied can only travel across one network interface, from/to an instance authentified with at most one certificate common name, and one username.
+These rules are built based on the assumption that an individual message on which ACL rules are to be applied can only travel across one network interface, from/to an instance authenticated with at most one certificate common name, and one username.
 
 To produce all combinations that characterize a subject configuration based on the rules of construction noted above, the Cartesian product of the *interfaces*, *cert_common_names* and *usernames* lists is calculated. The following is an example of a subject configurations and its internal representation.
 
